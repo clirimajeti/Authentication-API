@@ -24,8 +24,9 @@ describe('GET /most-liked', () => {
   it('should return Array of Users and status 200', done => {
       chai.request(app).get('/most-liked')
         .end((error, res) => {
-          expect(res.body).to.be.an.instanceof(Array)
-          .and.to.have.property(0)
+          // .and.to.have.property(users)
+          expect(res.body).to.be.an.instanceof(Object)
+          .to.have.nested.property("users[0]")
           .that.includes.all.keys([ '_id', 'user_name', 'email', 'likes', 'like_count' ])
           expect(res).to.have.status(200);
           done();
@@ -36,7 +37,7 @@ describe('GET /most-liked', () => {
 describe('POST /user/:id/like', () => {
    // Like User
    it('Should return message and status 200', done => {
-    chai.request(app).post('/user/5e4ebd780b1f30aa82fcd1b3/like').set("Authorization", 'Bearer ' + token)
+    chai.request(app).post('/user/5e4e32f4cdfc5e6c5c02644e/like').set("Authorization", 'Bearer ' + token)
     .end((error, res) => {
       expect(res).to.be.json;
       expect(res.body).to.be.an.instanceof(Object)
@@ -49,7 +50,7 @@ describe('POST /user/:id/like', () => {
 describe('POST /user/:id/unlike', () => {
   // Unlike User
   it('Should return message and status 200', done => {
-    chai.request(app).post('/user/5e4ebd780b1f30aa82fcd1b3/unlike').set("Authorization", 'Bearer ' + token)
+    chai.request(app).post('/user/5e4e32f4cdfc5e6c5c02644e/unlike').set("Authorization", 'Bearer ' + token)
     .end((error, res) => {
     expect(res).to.be.json;
     expect(res.body).to.be.an.instanceof(Object)

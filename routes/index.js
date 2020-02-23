@@ -1,13 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { isAuthenticated } = require('../config/auth');
-
-// User model
-const User = require('../models/User');
 
 // Controllers
 const UserController = require('../controllers/UserController');
 const LikeController = require('../controllers/LikeController');
+
+const User = require('../models/User');
 
 // Wellcome route
 router.get('/', (req, res) => {
@@ -26,18 +24,18 @@ router.post('/login',
   UserController.login   
 );
 
-// Log out handle
-router.get('/logout', isAuthenticated, (req, res) => {
-  req.logout();
-   res.json({
-     message: "User is logged out"
-   });
-});
-
 // Most likes
 router.get('/most-liked',
   LikeController.mostLikes
 );
+
+router.delete('/users', (req, res, next)=>{
+  User.deleteMany({ email: /test@test.com/}).then(() =>{
+    res.json({
+      message: "deleted"
+    })
+  })
+})
 
 
 module.exports = router;

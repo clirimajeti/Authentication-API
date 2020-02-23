@@ -22,9 +22,10 @@ before(async ()=>{
 describe('GET /user/:id', () => {
   // Get user data
   it('should return User data and status 200', done => {
-    chai.request(app).get('/user/5e4ebd780b1f30aa82fcd1b3')
+    chai.request(app).get('/user/5e4e32f4cdfc5e6c5c02644e')
       .end((error, res) => {
         expect(res.body).to.be.an.instanceof(Object)
+        .to.have.nested.property("user")
         .and.to.have.all.keys([ '_id', 'user_name', 'email', 'likes', 'like_count' ])
         expect(res).to.have.status(200);
         done();
@@ -38,6 +39,7 @@ describe('GET /me', () => {
    chai.request(app).get('/me').set("Authorization", 'Bearer ' + token)
    .end((error, res) => {
      expect(res.body).to.be.an.instanceof(Object)
+     .to.have.nested.property("user")
      .and.to.have.all.keys([ '_id', 'user_name', 'email', 'likes', 'like_count' ])
      expect(res).to.have.status(200);
      done();

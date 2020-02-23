@@ -25,7 +25,7 @@ describe('POST /signup', () => {
     chai.request(app).post('/signup').send({
       "user_name": "test",
       "password": "test1234",
-      "email": "test@test.com"
+      "email": "_test@test.com"
     }).end((error, res) => {
       expect(res.body).to.contain.property('message');
       expect(res).to.have.status(406);

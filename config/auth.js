@@ -26,7 +26,7 @@ module.exports = {
       // Next middleware
       return next();
     } else {
-      res.json({
+      res.status(403).json({
         message: "User is not logged in!"
       });
       res.redirect('/login');

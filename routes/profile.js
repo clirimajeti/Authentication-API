@@ -1,15 +1,7 @@
 const express = require('express');
 const router = express.Router();
 
-// Bcrypt
-const bcrypt = require('bcryptjs');
-
-// Jwt Auth
-const jwt = require('jsonwebtoken');
 const { isAuthenticated } = require('../config/auth');
-
-// User model
-const User = require('../models/User');
 
 // Controller
 const ProfileController = require('../controllers/ProfileController');
@@ -17,10 +9,10 @@ const ProfileController = require('../controllers/ProfileController');
 // Get user data 
 router.get('', 
   isAuthenticated,
-  ProfileController.getProfile
+  ProfileController.getLoggedInUser
 );
 
-// Like a user
+// Update password of loggedInUser
 router.put('/update-password', 
   isAuthenticated, 
   ProfileController.setNewPassword
