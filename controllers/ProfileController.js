@@ -1,11 +1,8 @@
-
 // Services
-const PasswordService = require('../services/PasswordService');
 const UserService = require('../services/UserService');
 
-
 module.exports = {
-  async getLoggedInUser(req, res) {
+  getLoggedInUser: async function (req, res) {
     if(req.token){
       const response  = await UserService.getUserByToken(req.token);
       res.status(response.status).json(response);
@@ -15,9 +12,9 @@ module.exports = {
       })
     }
   },
-  async setNewPassword (req, res) {
+  setNewPassword: async function (req, res) {
     const {old_password, new_password} = req.body;
-    if(req.token || old_password || new_password){
+    if(req.token && old_password && new_password){
       const response  = await UserService.setNewPassword(old_password, new_password, req.token);
       res.status(response.status).json(response);
     } else {
@@ -26,7 +23,7 @@ module.exports = {
       })
     }
   },
-  async getUser (req, res) {
+  getUser: async function (req, res) {
     if(req.params.id){
       const response  = await UserService.getUserByID(req.params.id);
       res.status(response.status).json(response);

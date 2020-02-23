@@ -2,7 +2,7 @@ const User = require('../models/User');
 const Like = require('../models/Like');
 
 module.exports = {
-  async setLike (receiver_id, giver_id) {
+  setLike: async function (receiver_id, giver_id) {
     try {
       const user = await User.findOne({ _id: receiver_id })
       if(!user){
@@ -39,7 +39,7 @@ module.exports = {
       };
     }
   },
-  async deletelike (receiver_id, giver_id) {
+  deletelike: async function (receiver_id, giver_id) {
     try {
       const user = await User.findOne({ _id: receiver_id });
       if(!user){
@@ -80,7 +80,7 @@ module.exports = {
       };
     }
   },
-  async getLikes (sort = -1) {
+  getLikes: async function (sort = -1) {
     // Sorting properties that can be user
     // sort by ascending order: 'asc', 'ascending', 1 ;
     // sort by descending order: 'desc', 'descending', -1;

@@ -15,7 +15,7 @@ module.exports = {
       const bearerToken = bearer[1];
 
       // Extract the user ID from the token
-      let data = jwt.decode(bearerToken, '12345'); 
+      let data = jwt.decode(bearerToken, process.env.ACCESS_TOKEN_SECRET || '12345'); 
       
       // Set user id
       req.userId = data.user._id;
