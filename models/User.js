@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const like = require('../models/Like');
+const cake = require('../models/Cake');
 
 const UserSchema =  new mongoose.Schema({
   user_name: { 
@@ -18,13 +18,9 @@ const UserSchema =  new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  likes: {
-    type: [ like.user_id ]
+  cakes: {
+    type: [ cake.cake_id ]
   },
-  like_count: {
-    type: Number,
-    default: 0
-  }
 });
 
 const User = mongoose.model('User', UserSchema);

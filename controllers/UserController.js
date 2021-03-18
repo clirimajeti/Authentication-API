@@ -3,6 +3,7 @@ const AuthService = require('../services/AuthService')
 
 module.exports = {
   createUser: async function (req, res) {
+    
     const { user_name, email, password } = req.body; 
     if(user_name && email && password){
       const response  = await AuthService.createNewUser(user_name, email, password);
@@ -14,6 +15,7 @@ module.exports = {
     }
   },
   login: async function (req, res) {
+    console.log(req.body)
     const { user_name, password } = req.body; 
     if(user_name && password){
       const response  = await AuthService.userLogin(user_name, password);

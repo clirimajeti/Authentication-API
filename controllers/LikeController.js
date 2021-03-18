@@ -2,9 +2,9 @@
 const LikeService = require('../services/LikeService');
 
 module.exports = {
-  likeUser: async function (req, res) {
-    if(req.params.id && req.userId){
-      const response  = await LikeService.setLike(req.params.id, req.userId);
+  likeCake: async function (req, res) {
+    if(req.body.user_id && req.body.cake_id){
+      const response  = await LikeService.setLike(req.headers['authorization'], req.body.cake_id, req.body.user_id);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({
@@ -12,9 +12,9 @@ module.exports = {
       })
     }
   },
-  unlikeUser: async function (req, res) {
+  unlikeCake: async function (req, res) {
     if(req.params.id && req.userId){
-      const response  = await LikeService.deletelike(req.params.id, req.userId);
+      const response  = await LikeService.deletelike(req.params.id, req.cakeId);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({
@@ -23,7 +23,7 @@ module.exports = {
     }
   },
   mostLikes: async function (req, res) {
-    const response  = await LikeService.getLikes();
+    const response  = await LikeService.getCakes();
     res.status(response.status).json(response);
   }
 };
