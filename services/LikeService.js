@@ -1,17 +1,61 @@
 const User = require('../models/User');
 const Like = require('../models/Like');
-const Cake = require('../models/Cake');
 const jwt = require('jsonwebtoken');
 
 module.exports = {
   setLike: async function (token, cakeId, giver_id) {
     try {
-      const bearer = token.split(" ");
-      // get the token from array
-      const bearerToken = bearer[1];
+    
+      let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345').user; 
+      const user = await User.findOne({ _id: giver_id })
 
-      // Extract the user ID from the token
-      let data = jwt.decode(bearerToken, process.env.ACCESS_TOKEN_SECRET || '12345'); 
+      if(!user){
+        return {
+          status: 404,
+          message: 'User not exits!'
+        };
+      }
+      const cakeIndex = user.cakes.findIndex((cake) => cake._id == cakeId)
+
+        if(cakeIndex > -1){
+          const found = (user.cakes[cakeIndex].likes).find(like => like.user_id === loggedInUser._id);
+
+          if (!found) {
+            const like = await new Like({
+              user_id: loggedInUser._id,
+              cake_id: cakeId
+            });
+            user.cakes[cakeIndex].rating += 1;
+            user.cakes[cakeIndex].likes.push(like);
+            user.markModified('cakes')
+            await user.save();
+            return {
+              status: 200,
+              message: "Cake has been liked"
+            };
+          } else {
+            return {
+              status: 200,
+              message: "Cake is liked already!"
+            };
+          }
+        } else {
+          return {
+            status: 404,
+            message: "Cake not found!"
+          };
+      }
+    } catch (error) {
+      return {
+        status: 500,
+        message:"Problem occurred to like the cake",
+        error: error
+      };
+    }
+  },
+  deletelike: async function (token, cakeId, giver_id) {
+    try { 
+      let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345').user; 
   
       const user = await User.findOne({ _id: giver_id })
       if(!user){
@@ -22,68 +66,42 @@ module.exports = {
       }
       const cakeIndex = user.cakes.findIndex((cake) => cake._id == cakeId)
 
-      if(cakeIndex > -1){
-          const found = (user.cakes[cakeIndex].likes).some(like => like.user_id === giver_id);
-          if (!found) {
-            const like = await new Like({
-              user_id: data._id
-            });
-            user.cakes[cakeIndex].rating += 1;
-            user.cakes[cakeIndex].likes.push(like);
+        if (cakeIndex > -1) {
+
+          const likes = (user.cakes[cakeIndex].likes).filter((like) => {
+            return like.user_id !== loggedInUser._id
+          });
+
+          if (likes.length < (user.cakes[cakeIndex].likes).length) {
+
+            user.cakes[cakeIndex].likes = likes
+
+            // likes counter updated
+            if(user.cakes[cakeIndex].rating > 0){
+              user.cakes[cakeIndex].rating -= 1;
+            }
+
+            user.markModified('cakes')
+
             await user.save();
+            
             return {
               status: 200,
-              message: "Cake has been liked"
+              message: "Cake has been unliked"
+            };
+
+          } else {
+            return {
+              status: 406,
+              message: "Cake should first be liked"
             };
           }
-     
         } else {
           return {
-            status: 200,
-            message: "Cake is liked already!"
+            status: 404,
+            message: "Cake not found!"
           };
         }
-    } catch (error) {
-      return {
-        status: 500,
-        message:"Problem occurred to like the cake",
-        error: error
-      };
-    }
-  },
-  deletelike: async function (cakeId, giver_id) {
-    try {
-      const cake = await Cake.findOne({ _id: cakeId });
-      if(!cake){
-        return {
-          status: 404,
-          message: 'Cake not exits!'
-        };
-      } else {
-        // find the user like from the array
-        const cakeLikes = ((cake.likes).filter(like => like.user_id == giver_id))[0];
-        if(cakeLikes){
-          // Like is removed from likes array
-          cale.likes.pull(cakeLikes);
-  
-          // likes counter updated
-          if(cake.rating > 0){
-            cake.rating -= 1;
-          }
-          // new user data saved
-          await cake.save();
-          
-          return {
-            status: 200,
-            message: "Cake has been unliked"
-          };
-        } else {
-          return {
-            status: 406,
-            message: "Cake should first be liked"
-          };
-        }
-      }
     } catch (error) {
       return {
         status: 500,
@@ -97,19 +115,15 @@ module.exports = {
     // sort by ascending order: 'asc', 'ascending', 1 ;
     // sort by descending order: 'desc', 'descending', -1;
     try {
-      const cakes = await Cake.find({}).sort({ rating: sort});
-      let formatedCakesArray = cakes.map(cake => {
-        return {
-          _id: cake._id,
-          cake_name: cake.cake_name,
-          cake_cook: cake.cake_cook,
-          date: cake.date,
-          rating: cake.rating
-        };
+      const users = await User.find({}).sort({ rating: sort});
+      let allCakes = []
+      users.map(user => {
+       return allCakes = [...allCakes, ...user.cakes]
       });
+      
       return {
         status: 200,
-        users: formatedCakesArray,
+        cakes: allCakes,
         sort: 'Descending',
       }; 
     } catch (error) {

@@ -3,6 +3,9 @@ const like = require('../models/Like');
 const user = require('../models/User');
 
 const CakeSchema =  new mongoose.Schema({
+  user_id: {
+    type: [user._id]
+  },
   cake_name: { 
     type:String,
     required: true
@@ -24,7 +27,7 @@ const CakeSchema =  new mongoose.Schema({
     default: ''
   },
   likes: {
-    type: [like.user_id],
+    type: [ like.user_id ],
   },
   rating: {
     type: Number,

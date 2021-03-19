@@ -8,6 +8,11 @@ const { isAuthenticated } = require('../config/auth');
 const LikeController = require('../controllers/LikeController');
 const CakeController = require('../controllers/CakeController');
 
+// Unlike a cake
+router.post('',
+  isAuthenticated, 
+  CakeController.createCake
+);
 
 // Get cake data 
 router.get('/:id/:cakeId', 

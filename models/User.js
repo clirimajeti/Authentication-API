@@ -19,7 +19,7 @@ const UserSchema =  new mongoose.Schema({
     default: Date.now
   },
   cakes: {
-    type: [ cake.cake_id ]
+    type: [ cake.user_id ]
   },
 });
 

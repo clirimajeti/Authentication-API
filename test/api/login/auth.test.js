@@ -38,7 +38,7 @@ describe('POST /login', () => {
   // Login returns  jsonwebtoken
   it('should return token and status 200', done => {
       chai.request(app).post('/login').send({
-        "user_name": "clirim",
+        "user_name": "testCake",
         "password": "kosova123"
       }).end((error, res) => {
         expect(res).to.be.json;
@@ -51,7 +51,7 @@ describe('POST /login', () => {
   // Username or password incorrect
   it('should return message and status 403', done => {
       chai.request(app).post('/login').send({
-        "user_name": "clirim",
+        "user_name": "testCake",
         "password": "test123412"
       }).end((error, res) => {
         expect(res).to.be.json;

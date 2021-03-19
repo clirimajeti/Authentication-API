@@ -1,10 +1,13 @@
 const User = require('../models/User');
 const Cake = require('../models/Cake');
 
+const jwt = require('jsonwebtoken');
+
 module.exports = {
-  setCake: async function (receiver_id, cake) {
+  setCake: async function (token, cake) {
     try {
-      const user = await User.findOne({ _id: receiver_id })
+      let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345'); 
+      const user = await User.findOne({ _id: loggedInUser.user._id })
       if(!user){
         return {
           status: 404,
@@ -31,9 +34,10 @@ module.exports = {
       };
     }
   },
-  deleteCake: async function (user_id, cake_id) {
+  deleteCake: async function (token, cake_id) {
     try {
-      const user = await User.findOne({ _id: user_id });
+      let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345'); 
+      const user = await User.findOne({ _id: loggedInUser.user._id });
       if(!user){
         return {
           status: 404,
@@ -107,7 +111,6 @@ module.exports = {
         date: cake.date,
         rating: cake.rating
        }
-       console.log(cake)
        return {
          status: 200,
          cake: formatedCake

@@ -3,8 +3,8 @@ const CakeService = require('../services/CakeService');
 
 module.exports = {
   createCake: async function (req, res) {
-    if(req.params.id && req.body){
-      const response  = await CakeService.setCake(req.params.id, req.body);
+    if(req.token && req.body){
+      const response  = await CakeService.setCake(req.token, req.body);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({
@@ -13,8 +13,8 @@ module.exports = {
     }
   },
   deleteCake: async function (req, res) {
-    if(req.params.id && req.userId){
-      const response  = await CakeService.deleteCake(req.params.id, req.cakeId);
+    if(req.token && req.cakeId){
+      const response  = await CakeService.deleteCake(req.token, req.cakeId);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({
@@ -27,7 +27,6 @@ module.exports = {
     res.status(response.status).json(response);
   },
   getCake: async function (req, res) {
-    console.log(req.params.id, 'id')
     if(req.params.id){
       const response  = await CakeService.getCakeByID(req.params.id);
       res.status(response.status).json(response);
