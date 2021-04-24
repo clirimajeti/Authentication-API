@@ -1,15 +1,16 @@
 const express = require('express');
-const mongoose = require('mongoose');
+// const mongoose = require('mongoose');
+const db = require('./config/queries')
 
 const app = express();
 
 // DB config
-const db = require('./config/keys').MongoURI;
+// const db = require('./config/keys').MongoURI;
 
 //Connect to Mongo
-mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then( () => { console.log('MongoDB Connected...') })
-  .catch(err => console.log(err));
+// mongoose.connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
+//   .then( () => { console.log('MongoDB Connected...') })
+//   .catch(err => console.log(err));
 
 // Bodyparser
 app.use(express.json());

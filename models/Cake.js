@@ -11,12 +11,8 @@ const CakeSchema =  new mongoose.Schema({
     required: true
   },
   cake_cook: { 
-    type: user.user_name,
-    required: true
-  },
-  cake_cook: { 
     type:String,
-    required: false
+    required: true
   },
   date: { 
     type: Date,

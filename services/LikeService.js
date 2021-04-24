@@ -1,49 +1,38 @@
-const User = require('../models/User');
-const Like = require('../models/Like');
 const jwt = require('jsonwebtoken');
+const pool = require('../config/queries')
 
 module.exports = {
-  setLike: async function (token, cakeId, giver_id) {
+  setLike: async function (token, cakeId) {
     try {
-    
       let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345').user; 
-      const user = await User.findOne({ _id: giver_id })
-
-      if(!user){
+      // const user = await User.findOne({ _id: giver_id })
+      if(!loggedInUser) {
         return {
-          status: 404,
-          message: 'User not exits!'
+          status: 403,
+          message: 'You do not have premission to like the cake!'
         };
-      }
-      const cakeIndex = user.cakes.findIndex((cake) => cake._id == cakeId)
-
-        if(cakeIndex > -1){
-          const found = (user.cakes[cakeIndex].likes).find(like => like.user_id === loggedInUser._id);
-
-          if (!found) {
-            const like = await new Like({
-              user_id: loggedInUser._id,
-              cake_id: cakeId
-            });
-            user.cakes[cakeIndex].rating += 1;
-            user.cakes[cakeIndex].likes.push(like);
-            user.markModified('cakes')
-            await user.save();
+      } else {
+        let like = await pool.query('SELECT * FROM likes WHERE user_id = $1 AND cake_id = $2', [loggedInUser.user.id, cakeId])
+        if(like){
+          return {
+            status: 200,
+            message: "Cake is liked already!"
+          };
+        } else {
+          let cake = await pool.query('SELECT * FROM cakes WHERE id = $1', [cakeId])
+          if(cake){
+            const res = await pool.query('INSERT INTO likes (user_id, cake_id) VALUES ($1, $2, $3, $4, $5)',[loggedInUser.user.id, cakeId])
             return {
               status: 200,
               message: "Cake has been liked"
             };
           } else {
             return {
-              status: 200,
-              message: "Cake is liked already!"
+              status: 404,
+              message: "Cake does not exists"
             };
           }
-        } else {
-          return {
-            status: 404,
-            message: "Cake not found!"
-          };
+        }
       }
     } catch (error) {
       return {
@@ -53,55 +42,43 @@ module.exports = {
       };
     }
   },
-  deletelike: async function (token, cakeId, giver_id) {
+  deletelike: async function (token, cakeId) {
     try { 
       let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345').user; 
   
-      const user = await User.findOne({ _id: giver_id })
-      if(!user){
+      if(!loggedInUser) {
         return {
-          status: 404,
-          message: 'User not exits!'
+          status: 403,
+          message: 'You do not have premission to unlike the cake!'
         };
-      }
-      const cakeIndex = user.cakes.findIndex((cake) => cake._id == cakeId)
-
-        if (cakeIndex > -1) {
-
-          const likes = (user.cakes[cakeIndex].likes).filter((like) => {
-            return like.user_id !== loggedInUser._id
-          });
-
-          if (likes.length < (user.cakes[cakeIndex].likes).length) {
-
-            user.cakes[cakeIndex].likes = likes
-
-            // likes counter updated
-            if(user.cakes[cakeIndex].rating > 0){
-              user.cakes[cakeIndex].rating -= 1;
+      } else {
+        
+        let cake = await pool.query('SELECT * FROM cakes WHERE id = $1', [cakeId])
+        if(cake){
+          let like = await pool.query('SELECT * FROM likes WHERE user_id = $1 AND cake_id = $2', [loggedInUser.user.id, cakeId])
+      
+          if(like){
+            let res = await pool.query('DELETE FROM likes WHERE user_id = $1 AND cake_id = $2', [loggedInUser.user.id, cakeId])
+            if(res){
+              return {
+                status: 200,
+                message: "Cake has been unliked"
+              };
             }
-
-            user.markModified('cakes')
-
-            await user.save();
-            
-            return {
-              status: 200,
-              message: "Cake has been unliked"
-            };
-
           } else {
             return {
-              status: 406,
-              message: "Cake should first be liked"
+              status: 200,
+              message: "Cake should be liked first!"
             };
           }
+   
         } else {
           return {
             status: 404,
-            message: "Cake not found!"
+            message: "Cake not found"
           };
         }
+      }
     } catch (error) {
       return {
         status: 500,
@@ -110,28 +87,4 @@ module.exports = {
       };
     }
   },
-  getCakes: async function (sort = -1) {
-    // Sorting properties that can be user
-    // sort by ascending order: 'asc', 'ascending', 1 ;
-    // sort by descending order: 'desc', 'descending', -1;
-    try {
-      const users = await User.find({}).sort({ rating: sort});
-      let allCakes = []
-      users.map(user => {
-       return allCakes = [...allCakes, ...user.cakes]
-      });
-      
-      return {
-        status: 200,
-        cakes: allCakes,
-        sort: 'Descending',
-      }; 
-    } catch (error) {
-      return {
-        status: 500,
-        message: "Unable to get the cakes",
-        error: error
-      }
-    }
-  }
 }

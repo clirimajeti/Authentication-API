@@ -1,10 +1,11 @@
 const jwt = require('jsonwebtoken');
+const pool = require('../config/queries')
 
 // Services
 const PasswordService = require('./PasswordService');
 
 // Models
-const User = require('../models/User');
+// const User = require('../models/User');
 
 module.exports = {
   createNewUser: async function (user_name, email, password) {
@@ -26,30 +27,27 @@ module.exports = {
         }
       } else {
         // Validation passed
-        let user = await User.findOne({ user_name: user_name });
+        let response = await pool.query('SELECT * FROM users WHERE user_name = $1', [user_name])
+    
+        let user = response.rows.length ? response.rows : null
+        // let user = await User.findOne({ user_name: user_name });
         if(user){
             return {
               status: 406,
               message: 'Username exits! Please try another username!'
             }
         } else {
-          const newUser = await new User({
-            user_name,
-            email,
-            password
-          });
-          
           // Hash Password
-          const hash = await PasswordService.hashPassword(newUser.password);
-          // Set hashed password
-          newUser.password = hash;
-          // Save User
-          await newUser.save()
-
-          return {
-            status: 201,
-            message: "User is created"
-          };
+          let hash = await PasswordService.hashPassword(password);
+          console.log({user_name, email, hash})
+          const res = await pool.query('INSERT INTO users (user_name, email, password) VALUES ($1, $2, $3)', [user_name, email, hash])
+          console.log(res, 'res')
+          if (res) {
+            return {
+              status: 201,
+              message: "User is created"
+            };
+          } 
         }
       } 
     } catch (error) {
@@ -62,7 +60,10 @@ module.exports = {
   userLogin: async function (user_name, password) {
     try {
       // Match User
-      let user = await User.findOne({user_name: user_name})
+      let response = await pool.query('SELECT * FROM users WHERE user_name = $1', [user_name])
+    
+      let user = response.rows.length ? response.rows[0] : null
+      // let user = await User.findOne({user_name: user_name})
     
       if (!user) {
         res.json({message: 'That user is not registered'});

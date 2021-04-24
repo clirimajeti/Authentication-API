@@ -1,30 +1,27 @@
-const User = require('../models/User');
-const Cake = require('../models/Cake');
+const pool = require('../config/queries')
 
 const jwt = require('jsonwebtoken');
 
 module.exports = {
-  setCake: async function (token, cake) {
+  createCake: async function (token, cake) {
     try {
       let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345'); 
-      const user = await User.findOne({ _id: loggedInUser.user._id })
+      let user = await pool.query('SELECT * FROM users WHERE id = $1', [loggedInUser.user.id])
+      // const user = await User.findOne({ _id: loggedInUser.user._id })
       if(!user){
         return {
           status: 404,
           message: 'Username not exits!'
         };
       } else {
-          const newCake = await new Cake({
-            cake_name: cake.cake_name,
-            cake_cook: cake.cake_cook,
-            date: cake.date,
-          });
-          user.cakes.push(newCake);
-          await user.save();
+        const res = await pool.query('INSERT INTO cakes (user_name, user_id, cake_name, served, url) VALUES ($1, $2, $3, $4, $5)', [user.user_name, user.id, cake.cake_name, cake.served, cake.url])
+        console.log(res, 'res')
+        if (res) {
           return {
             status: 200,
             message: "User has added a new Cake"
           };
+        } 
       }
     } catch (error) {
       return {
@@ -36,27 +33,29 @@ module.exports = {
   },
   deleteCake: async function (token, cake_id) {
     try {
-      let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345'); 
-      const user = await User.findOne({ _id: loggedInUser.user._id });
+      let loggedInUser = jwt.decode(token, process.env.ACCESS_TOKEN_SECRET || '12345');
+      let user = await pool.query('SELECT * FROM users WHERE id = $1', [loggedInUser.user.id])
+      // const user = await User.findOne({ _id: loggedInUser.user._id });
       if(!user){
         return {
           status: 404,
           message: 'Username not exits!'
         };
       } else {
-        // find the cake from the array
-        const userCake = ((user.cakes).filter(cake => cake.id == cake_id))[0];
-        if(userCake){
-          // Cake is removed from cakes array
-          user.cakes.pull(userCake);
-  
-          // new user data saved
-          await user.save();
-          
-          return {
-            status: 200,
-            message: "Cake has been removed"
-          };
+        let cake = await pool.query('SELECT * FROM cakes WHERE cake_id = $1 AND user_id = $2', [cake_id, user.id])
+        if(cake){
+          let res = await pool.query('DELETE FROM cakes WHERE cake_id = $1 AND user_id = $2', [cake.id, user.id])
+          if(res) {
+            return {
+              status: 200,
+              message: "Cake has been removed"
+            };
+          } else {
+            return {
+              status: 500,
+              message: "Something went wrong"
+            };
+          } 
         } else {
           return {
             status: 406,
@@ -72,17 +71,22 @@ module.exports = {
       };
     }
   },
-  getCakes: async function (sort = -1) {
+  getCakes: async function (sort = 1) {
     // Sorting properties that can be user
     // sort by ascending order: 'asc', 'ascending', 1 ;
     // sort by descending order: 'desc', 'descending', -1;
+    const sorted = sort == -1 ? 'DESC' : 'ASC'
+
     try {
-      const cakes = await User.find({}).sort({ cakes: sort});
-      let formatedCakesArray = cakes.map(cake => {
+      const response = await pool.query(`SELECT * FROM cakes ORDER BY id ${sorted}`)
+      // const cakes = await User.find({}).sort({ cakes: sort});
+      console.log(response.rows)
+      let formatedCakesArray = response.rows.map(cake => {
         return {
-          _id: cake._id,
+          id: cake.id,
           cake_name: cake.cake_name,
-          cake_cook: cake.cake_cook,
+          cake_cook: cake.user_name,
+          user_id: cake.user_id,
           date: cake.date,
           rating: cake.rating
         };
@@ -100,12 +104,12 @@ module.exports = {
       }
     }
   },
-  getCakeByID: async function (userId, id) {
-    const user =  await User.findOne({_id: userId});
-    if(user){
-      const cake = ((user.cakes).filter(cake => cake.id == id))[0];
+  getCakeByID: async function (cakeId) {
+    let cake = await pool.query('SELECT * FROM cakes WHERE id = $1', [cakeId])
+    // const user =  await User.findOne({_id: userId});
+    if(cake){
        let formatedCake = {
-        _id: cake._id,
+        _id: cake.id,
         cake_name: cake.cake_name,
         cake_cook: cake.cake_cook,
         date: cake.date,

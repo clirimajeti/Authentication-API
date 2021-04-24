@@ -4,7 +4,7 @@ const CakeService = require('../services/CakeService');
 module.exports = {
   createCake: async function (req, res) {
     if(req.token && req.body){
-      const response  = await CakeService.setCake(req.token, req.body);
+      const response  = await CakeService.createCake(req.token, req.body);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({

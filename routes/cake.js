@@ -15,6 +15,11 @@ router.post('',
 );
 
 // Get cake data 
+router.get('/', 
+    CakeController.getCakes
+  );
+
+// Get cake data 
 router.get('/:id/:cakeId', 
     CakeController.getCake
   );
