@@ -1,8 +1,12 @@
 const express = require('express');
 // const mongoose = require('mongoose');
 const db = require('./config/queries')
+const cors = require('cors')
 
 const app = express();
+
+app.use(cors())
+
 
 // DB config
 // const db = require('./config/keys').MongoURI;

@@ -15,12 +15,14 @@ router.post('',
 );
 
 // Get cake data 
-router.get('/', 
+router.get('/',
+    isAuthenticated, 
     CakeController.getCakes
   );
 
 // Get cake data 
 router.get('/:id/:cakeId', 
+    isAuthenticated, 
     CakeController.getCake
   );
 

@@ -15,7 +15,6 @@ module.exports = {
         };
       } else {
         const res = await pool.query('INSERT INTO cakes (user_name, user_id, cake_name, served, url) VALUES ($1, $2, $3, $4, $5)', [user.user_name, user.id, cake.cake_name, cake.served, cake.url])
-        console.log(res, 'res')
         if (res) {
           return {
             status: 200,
@@ -80,7 +79,6 @@ module.exports = {
     try {
       const response = await pool.query(`SELECT * FROM cakes ORDER BY id ${sorted}`)
       // const cakes = await User.find({}).sort({ cakes: sort});
-      console.log(response.rows)
       let formatedCakesArray = response.rows.map(cake => {
         return {
           id: cake.id,

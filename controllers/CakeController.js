@@ -23,8 +23,14 @@ module.exports = {
     }
   },
   getCakes: async function (req, res) {
-    const response  = await CakeService.getCakes();
-    res.status(response.status).json(response);
+    if(req.token){
+      const response  = await CakeService.getCakes();
+      res.status(response.status).json(response);
+    } else {
+      res.status(400).json({
+        message: 'Bad request'
+      })
+    }
   },
   getCake: async function (req, res) {
     if(req.params.id){

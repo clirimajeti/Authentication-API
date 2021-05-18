@@ -3,8 +3,8 @@ const LikeService = require('../services/LikeService');
 
 module.exports = {
   likeCake: async function (req, res) {
-    if(req.token && req.body.user_id && req.body.cake_id){
-      const response  = await LikeService.setLike(req.token, req.body.cake_id, req.body.user_id);
+    if(req.userId && req.body.cake_id){
+      const response  = await LikeService.setLike(req.userId, req.body.cake_id);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({
@@ -13,8 +13,8 @@ module.exports = {
     }
   },
   unlikeCake: async function (req, res) {
-    if(req.token && req.body.user_id && req.body.cake_id){
-      const response  = await LikeService.deletelike(req.token, req.body.cake_id, req.body.user_id);
+    if(req.userId && req.body.user_id && req.body.cake_id){
+      const response  = await LikeService.deletelike(req.userId, req.body.cake_id, req.body.user_id);
       res.status(response.status).json(response);
     } else {
       res.status(400).json({

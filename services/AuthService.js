@@ -39,9 +39,7 @@ module.exports = {
         } else {
           // Hash Password
           let hash = await PasswordService.hashPassword(password);
-          console.log({user_name, email, hash})
           const res = await pool.query('INSERT INTO users (user_name, email, password) VALUES ($1, $2, $3)', [user_name, email, hash])
-          console.log(res, 'res')
           if (res) {
             return {
               status: 201,
@@ -57,14 +55,12 @@ module.exports = {
       };
     }
   },
-  userLogin: async function (user_name, password) {
+  userLogin: async function (user) {
     try {
-      // Match User
       let response = await pool.query('SELECT * FROM users WHERE user_name = $1', [user_name])
     
-      let user = response.rows.length ? response.rows[0] : null
+      // let user = response.rows.length ? response.rows[0] : null
       // let user = await User.findOne({user_name: user_name})
-    
       if (!user) {
         res.json({message: 'That user is not registered'});
       } 
